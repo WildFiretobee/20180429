@@ -1,0 +1,316 @@
+STL回忆录:
+    1.容器
+	线性容器：array	 vector  deque     list     forward_list
+
+		> 对于vector和deque而言，底层实现的元素是连续的，支持元素的随机访问
+		> 对于list而言，不支持随机访问，只支持双向访问
+
+		vector<int> vectInt(10);
+		vector<int> vectInt(10, 1);							
+		vector<int> vectInt(arr, arr+5);
+		vector<int> vecInt{1, 2, 3};
+		vector<int> vecInt={1, 2, 3};
+
+		操作(方法) 			      vector     deque     list
+		
+		
+		push_back				1 O(1)     1         1
+		pop_back				1          1         1
+		push_front              		0          1 O(1)    1 O(1)
+		pop_front              			0          1 O(1)    1 O(1)
+		insert					1 O(N)     1 O(N)		 1 O(1)
+iterator	insert(it,value);			1 O(N)     1 O(N)    1 O(1)
+void	insert(it, count, value);
+iteartor  insert(it, begin, end);
+
+		erase					1 O(N)     1 O(N)    1 O(1)
+		clear					1          1         1
+		size                    		1          1         1
+		capacity                		1          0         0
+		operator[]              		1 O(1)     1 O(1)    0
+		shrink_to_fit(删除未使用的内存)		1          1         0
+											
+	
+
+	关联容器：set    map     multiset  multimap
+
+		
+			> 元素有序，默认情况下采用升序方式排列;
+					如果存放的是自定义类类型，必须要重载比较函数
+			> 底层实现采用的是红黑树  --> 动态平衡二叉树 --> 为了加快元素的查找速度 O(logN)
+									
+			> set没有重载下标访问运算符
+			> set不能修改已经存放在其中的元素的值, 可以删除，不能修改
+			
+							
+			> map重载了下标访问运算符, 时间复杂度还是O(logN), 并不是O(1)
+				//下标访问运算符执行时，若关键字存在，直接返回对应的value;
+				//若关键字不存在，则会根据关键字创建一个元素（pair）
+
+			> map中的key不能进行修改，但是修改key对应的value的值
+								mapStrInt["hello"]
+			> 获取key "hello" 对应的 value 
+
+			> 如果map之中不包含"hello"对应的元素, 直接创建一个
+
+			> 对于map而言，如果只需要确定key是否存在map之中，可以调用的操作有
+																														
+				count				利用等于操作符，把标志范围内的元素与输入值比较，返回相等元素个数。如果存在，返回值大于0;如果不存在，返回值为0
+				find				迭代器，如果存在，直接返回；如果不存在，返回 end()；利用等于操作符，把标志范围内的元素与输入值比较，返回相等元素个数。
+				lower_bound  [     		返回一个Forward_Iterator，指向在有序序列范围内的可以插入指定值而不破坏容器顺序的第一个位置。重载函数使用自定义比较操作。
+				upper_bound     )		返回一个Forward_Iterator，指向在有序序列范围内插入value而不破坏容器顺序的最后一个位置，该位置标志一个大于value的值。重载函数使用自定义比较操作。
+				equal_range  [  )		功能类似equal，返回一对iterator，第一个表示lower_bound，第二个表示upper_bound。
+								
+				> insert			mapIntStr.insert(std::make_pair(1,"ps"));
+								返回值为std::pair<map<string, int, std::greater<string>>::iterator, bool>
+								
+								auto ret = mapStrInt.insert(std::make_pair("king",520));
+								if(ret.second)
+								{
+									cout << "insert success" << endl;
+									cout << ret.first->first << "-->" << ret.first->second << endl;
+								}
+										
+				> erase
+									
+									
+				> set				--> 内部只有“键” key 的概念
+				> multiset
+									
+				> map				--> 元素是 std::pair  键值对  key --> value
+				> multimap
+												
+					able  -> 10
+					bind  -> 4
+					hello -> 1    -> lower_bound 
+					hello -> 2	
+					hello -> 3
+					know  -> 10		-> upper_bound
+									
+					lower_bound       
+					upper_bound
+					equal_range   返回值 迭代器的区间是左闭右开 [ )
+									
+				> set/map   -->  不能存放重复的关键字
+				> insert 有可能插入失败
+						mapStrInt.insert(std::make_pair("xxx", 10));
+												
+				> multiset/multimap --> 能够存放关键字相同的元素，默认情况下以升序的方式进行排序，因为默认情况下指定了 operator< 的比较方式
+					//multiset/multimap 不支持下标访问运算符
+					//multiset 的底层实现是红黑树 --> 动态平衡二叉树 --> 原因：加快元素查找的效率 O(logN) --> 二分查找	
+					//添加到multiset/multimap中的元素不能修改
+
+	无序关联容器（--> hash表）：
+		  unordered_set	       unordered_map  	
+		  unordered_multiset   unordered_multimap
+
+    2.迭代器（对容器的访问逻辑的抽象）
+	输入迭代器
+		前向的只读访问器（只能进行++操作）
+			V = *X++; V = *X; X++;
+		  把输入流看成容器
+		  std::istream_iterator
+		  重载*解引用运算符
+
+	输出迭代器
+		前向的只写访问器（只能进行++操作）
+			*X++ = V; *X = V; ++X;
+		  把输出流看成容器
+		  std::ostream_iterator  -->  设计模式：适配器模式
+		  重载 = 复制运算符
+
+	前向存取迭代器
+		具有输入迭代器和输出迭代器的所有特征（只能进行++操作）
+
+	双向存取迭代器
+		具有前向迭代器所有特征（能进行++和--操作）
+		
+	随机存取迭代器
+		具有双向迭代器所有特征（可以对容器数据结构进行随机访问）--> 只能用于顺序容器vector,array,deque			
+	
+    3.算法（解决问题的方式）<algorithm>
+	> 非修改式操作  
+		> for_each	给出两个范围，返回一个Forward_Iterator，查找成功指向第一个范围内第一次出现子序列(第二个范围)的位置，查找失败指向last	
+					for_earch(numbers.begin(),numbers.end(),function或者lambda表达式);
+					
+					//lambda表达式代表的是匿名函数
+					for_each(numbers.begin(), numbers.end(), [&](int number){
+						cout << number << " a = " << a << " b = " << b << endl;
+					});
+
+		> find			O(N)     利用底层元素的等于操作符，对指定范围内的元素与输入值进行比较。当匹配时，结束搜索，返回该元素的一个Input_Iterator。	
+		> count			利用等于操作符，把标志范围内的元素与输入值比较，返回相等元素个数。
+
+		> search		给出两个范围，返回一个ForwardIterator，查找成功指向第一个范围内第一次出现子序列(第二个范围)的位置，查找失败指向last
+		> binary_search   如果元素有序，就直接用二分查找 O(logN)
+			std::sort(numbers.begin(), numbers.end());//排序
+			cout << std::boolalpha << std::binary_search(numbers.begin(),
+			numbers.end(),10) << endl;//二分查找元素10
+
+		> lower_bound
+			auto it1 = std::lower_bound(numbers.begin(), numbers.end(), 2);
+
+		> upper_bound
+			std::upper_bound(numbers.begin(), numbers.end(), 2);	
+		
+		> equal_range 	结合lower_bound和upper_bound形成左闭右开的区间
+			auto ret = std::equal_range(numbers.begin(), numbers.end(), 2);
+			while(ret.first != ret.second)
+			{
+				cout << *ret.first << ",";
+				++ret.first;
+			}				
+									 
+	> 修改式操作
+		> copy/copy_if
+			std::copy(numbers.begin(),numbers.end(), std::ostream_iterator<int>(cout, " "));//输出容器中的元素
+
+		> replace/replace_if
+			std::replace(numbers.begin(), numbers.end(), 3, 7);
+
+			std::less<int> lt;
+			//大于3的换成7
+			std::replace_if(numbers.begin(), numbers.end(), std::bind1st(lt,3), 7); // lt(3, x) 函数适配（绑定）器
+			
+			//小于3的换成7
+			std::replace_if(numbers.begin(), numbers.end(), std::bind2nd(lt,3), 7); // lt(x, 3) 函数适配（绑定）器
+
+		> remove/remove_if   
+				--> remove不会真正删除元素  //通常把要删除的元素放在后面
+				--> 真正删除还要使用erase
+				--> erase-remove惯用法
+					numbers.erase(remove(numbers.begin(), numbers.end(), 66),
+							numbers.end());
+					copy(numbers.begin(), numbers.end(),
+							std::ostream_iterator<int>(cout, ","));
+			
+			//遍历容器的过程中，不要做删除或者添加元素的操作
+			//遍历容器的过程中，添加元素可能会产生异常情况
+			//因为底层发生了动态扩容，原来的迭代器失效了
+
+		> reverse(v.begin(),v.end())  将指定范围内元素重新反序排序。
+			//把容器中的元素逆序输出
+			vector<int>::reverse_iterator rit = numbers.rbegin();
+			while(rit != numbers.rend())
+			{
+				cout << *rit << " ";
+				++rit;
+			}									
+			
+	> 集合操作
+		> set_intersection	//求交集
+			std::set_intersection(
+			numbers1.begin(), numbers1.end(),
+			numbers2.begin(), numbers2.end(),
+			std::ostream_iterator<int>(cout, " "));
+
+		> set_difference	//求差集（num1中元素-交集元素）
+			std::set_difference(
+			numbers1.begin(), numbers1.end(),
+			numbers2.begin(), numbers2.end(),
+			std::ostream_iterator<int>(cout, " "));
+							
+	> 排序有关的
+		> sort		  以升序重新排列指定范围内的元素。重载版本使用自定义的比较操作。
+		> stable_sort	  与sort类似，不过保留相等元素之间的顺序关系。								
+									
+		> random_shuffle   对指定范围内的元素随机调整次序。重载版本输入一个随机数产生操作。	
+
+    4.适配器（通过组合特定的容器实现的一种新的数据结构）
+	> 容器适配器
+			> stack
+			> queue
+			> priority_queue
+				> 有优先级的概念,会根据优先级进行排序
+					//优先级队列默认情况下的比较方式是：std::less<T>
+					//元素出队的时候是按降序的方式进行排列
+				> 底层实现是堆排序，默认情况下创建的是大顶堆
+					//每一次比较都是用
+					//堆顶的元素与新添加的元素进行比较，当compare(top, newElem)
+					//返回值为true时，先把堆顶的元素放到堆底，再用新元素替换堆顶的元素
+																						
+	> 迭代器适配器
+			> std::istream_iterator
+			> std::ostream_iterator
+				copy(numbers1.begin(),numbers1.end(),
+						ostream_iterator<int>(cout, ","));
+
+			> 反向迭代器
+					Container::reverse_iterator -->  std::reverse_iterator
+			> 插入迭代器
+
+			> std::back_insert_iterator  --> 调用push_back方法  --> vector,deque,list
+				copy(numbers2.begin(), numbers2.end(),
+						back_insert_iterator<vector<int>>(numbers1));
+
+			> std::front_insert_iterator --> 调用push_front方法 --> deque,list
+				copy(numbers1.begin(), numbers1.end(),
+						front_insert_iterator<list<int>>(numbers2));
+				
+			> std::insert_iterator	     --> 调用insert方法     --> 除了array,forward_list不适用，其他的容器都适用
+				copy(numbers1.begin(), numbers1.end(),
+						insert_iterator<list<int>>(numbers2, numbers2.begin()));
+
+			> 函数模板
+			> back_inserter 
+			> front_inserter
+			> inserter
+									
+	> 算法适配器
+************************> bind
+				> 可以绑定任意的函数，
+				> 提前绑定形参时，可以绑定任意个参数
+				> 如果有些参数不想提前绑定， 则必须使用占位符
+				> 占位符本身所在的位置就是相应形参的所在的位置，
+								占位符的数字代表的是实参传递时实参的位置
+				> bind绑定参数时采用的是值传递 --> 复制, 如果需要引用传递，则必须使用 std::ref/std::cref
+											
+				> 如果绑定的是成员函数，提前绑定参数时，第一个位置可以是传对象，也可以传指针
+																					
+						//std::bind中绑定参数的位置对应的就是相应函数的形参所在的位置
+						// 占位符上的数字代表的是实参传递时的实参位置
+
+						//std::function<int(int)> f = std::bind(add, 10, std::placeholders::_1);// 可以把std::function看成函数的容器
+						auto f = std::bind(print, std::placeholders_2, _1);   f(10, 20);
+						std::bind(print, 10, 20);
+
+						//如果要绑定成员函数，必须要加上取地址&
+						auto f = std::bind(&Example::show, &example, 10, 20);//void Example::show(int,int) --> void(void)
+	
+									
+			> mem_fn
+				> 绑定成员函数
+				> 当容器之中的元素是对象或者对象指针，
+							而遍历容器的过程中，需要使用成员函数，此时就可以使用mem_fn
+					
+
+    5.函数对象（重载了operator()操作符的对象）
+	> std::function<R(Arags...)> f;
+	> 普通函数
+	> 函数指针
+	> 重载了函数调用运算符的类对象	
+
+    6.空间配置器（透明）
+	> std::alloactor
+		static std::allocate<Type> alloc;
+		Type * newStart = alloc.allocate(10);	//申请10个内存
+		std::uninitialized_copy(_start, _finish, newStart); //在对象未创建时，给对象赋值
+		alloc.destory(--_finish);//调用析构函数，消除对象
+		alloc.deallocate(_start, cap);//销毁cap个空间
+
+    7.排序	
+			
+	>内部排序: 把待排序数据一次性加载到内存中
+		8大排序：
+			> 冒泡排序
+			> 快速排序
+						
+			> 插入排序
+			> 希尔排序
+						
+			> 选择排序
+			> 堆排序
+			> 归并排序
+						
+			> 基数排序
+	>外部排序
